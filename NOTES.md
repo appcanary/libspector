@@ -46,6 +46,38 @@ $ ldd /usr/sbin/nginx
     ...
 ```
 
+List of dynamically linked libraries of a *progress*:
+
+```
+$ # pldd 10546
+10546:  /usr/sbin/nginx
+linux-vdso.so.1
+/lib/x86_64-linux-gnu/libpthread.so.0
+/lib/x86_64-linux-gnu/libcrypt.so.1
+/lib/x86_64-linux-gnu/libpam.so.0
+/lib/x86_64-linux-gnu/libexpat.so.1
+/lib/x86_64-linux-gnu/libpcre.so.3
+/lib/x86_64-linux-gnu/libssl.so.1.0.0
+/lib/x86_64-linux-gnu/libcrypto.so.1.0.0
+/lib/x86_64-linux-gnu/libz.so.1
+/usr/lib/x86_64-linux-gnu/libxml2.so.2
+/usr/lib/x86_64-linux-gnu/libxslt.so.1
+...
+$ pmap 10546
+10546:   nginx: master process /usr/sbin/nginx
+0000000000400000    788K r-x--  /usr/sbin/nginx
+00000000006c4000      4K r----  /usr/sbin/nginx
+00000000006c5000     84K rw---  /usr/sbin/nginx
+00000000006da000     60K rw---    [ anon ]
+0000000000cd3000    504K rw---    [ anon ]
+0000000000d51000    844K rw---    [ anon ]
+00007fee20e23000     48K r-x--  /lib/x86_64-linux-gnu/libnss_files-2.17.so
+00007fee20e2f000   2044K -----  /lib/x86_64-linux-gnu/libnss_files-2.17.so
+00007fee2102e000      4K r----  /lib/x86_64-linux-gnu/libnss_files-2.17.so
+00007fee2102f000      4K rw---  /lib/x86_64-linux-gnu/libnss_files-2.17.so
+...
+```
+
 Package owns file:
 
 ```
