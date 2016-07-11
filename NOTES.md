@@ -1,5 +1,12 @@
 # Notes
 
+Abstractions:
+
+* lsof, pmap, pldd
+* ldd, otool (osx)
+* dpkg/dpkg-query
+
+
 ## Ubuntu
 
 Find process:
@@ -136,3 +143,8 @@ When was a library last modified:
 $ stat --format="%z" /lib/x86_64-linux-gnu/libcrypt.so.1
 2014-04-09 06:57:09.555173000 +0000
 ```
+
+
+## OSX
+
+`otool -L`
