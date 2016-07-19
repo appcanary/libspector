@@ -13,10 +13,10 @@ type Library interface {
 	Outdated() bool
 
 	// Distribution package manager's dependency that owns this library.
-	Package() Package
+	Package() (Package, error)
 
 	// Find processes using this library
-	Processes() []Process
+	Processes() ([]Process, error)
 }
 
 type Process interface {
@@ -24,7 +24,7 @@ type Process interface {
 	Started() time.Time
 
 	// Find libraries used by this process
-	Libraries() []Library
+	Libraries() ([]Library, error)
 }
 
 type Query interface {
