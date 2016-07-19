@@ -5,8 +5,15 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"strings"
 	"time"
 )
+
+const layoutLStart = "Mon _2 Jan 15:04:05 2006"
+
+func parseLStart(s string) (time.Time, error) {
+	return time.Parse(layoutLStart, s)
+}
 
 type process struct {
 	pid     int
@@ -15,6 +22,26 @@ type process struct {
 
 func (p *process) PID() int {
 	return p.pid
+}
+
+func (p *process) Started() (time.Time, error) {
+	if p.started != nil {
+		return *p.started, nil
+	}
+
+	started := time.Time{}
+	cmd := exec.Command("ps", "-p", fmt.Sprintf("%d", p.PID()), "-o", "lstart=")
+	out, err := cmd.Output()
+	if err != nil {
+		return started, err
+	}
+
+	started, err = parseLStart(strings.TrimSpace(string(out)))
+	if err != nil {
+		return started, err
+	}
+	p.started = &started
+	return started, nil
 }
 
 func FindProcess(command string) ([]process, error) {

@@ -21,7 +21,7 @@ type Library interface {
 
 type Process interface {
 	PID() int
-	Started() time.Time
+	Started() (time.Time, error)
 
 	// Find libraries used by this process
 	Libraries() ([]Library, error)
