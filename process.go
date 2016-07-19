@@ -20,10 +20,12 @@ type process struct {
 	started *time.Time
 }
 
+// PID returns the process ID.
 func (p *process) PID() int {
 	return p.pid
 }
 
+// Started uses `ps` to query the start timestamp of the process.
 func (p *process) Started() (time.Time, error) {
 	if p.started != nil {
 		return *p.started, nil
@@ -44,7 +46,10 @@ func (p *process) Started() (time.Time, error) {
 	return started, nil
 }
 
+// FindProcess uses `pgrep` to find all processes that match a command.
 func FindProcess(command string) ([]process, error) {
+	// TODO: Do we want more flexible querying abilities? Such as full arg
+	// substring, or parent pid, etc?
 	cmd := exec.Command("pgrep", command)
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf
