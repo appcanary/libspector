@@ -48,8 +48,8 @@ func (p *process) Started() (time.Time, error) {
 
 // FindProcess uses `pgrep` to find all processes that match a command.
 func FindProcess(command string) ([]process, error) {
-	// TODO: Do we want more flexible querying abilities? Such as full arg
-	// substring, or parent pid, etc?
+	// TODO: Do we want more flexible querying abilities? Such as full arg substring, or parent pid, etc?
+	// TODO: Consider getting the full process list at once, including start time with `ps aux` or similar?
 	cmd := exec.Command("pgrep", command)
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf
