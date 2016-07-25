@@ -9,7 +9,7 @@ type Package interface {
 
 type Library interface {
 	Path() string
-	Modified() time.Time
+	Modified() (time.Time, error)
 	Outdated() bool
 
 	// Distribution package manager's dependency that owns this library.
