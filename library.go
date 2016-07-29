@@ -14,7 +14,7 @@ var ErrParseCmdOutput = errors.New("failed to parse command output")
 
 type library struct {
 	path     string
-	pkg      string
+	pkgName  string
 	modified *time.Time
 }
 
@@ -37,6 +37,10 @@ func (lib *library) Modified() (time.Time, error) {
 	return mtime, nil
 }
 
+func (lib *library) Package() (*pkg, error) {
+	return findPackage(lib.pkgName)
+}
+
 // parseFindLibrary parses output produced by commands run within FindLibrary,
 // separated out for testing.
 func parseFindLibrary(buf *bytes.Buffer) ([]library, error) {
@@ -44,14 +48,14 @@ func parseFindLibrary(buf *bytes.Buffer) ([]library, error) {
 	scanner := bufio.NewScanner(buf)
 	for scanner.Scan() {
 		// Each line should look like:
-		// somelib-1.0:maybeplatform: /usr/lib/somelib.so
+		// somelib-1.0:maybearch: /usr/lib/somelib.so
 		line := scanner.Text()
 		parts := strings.Split(line, ":")
 		if len(parts) < 2 {
 			return nil, ErrParseCmdOutput
 		}
 		pkg, path := parts[0], strings.TrimSpace(parts[len(parts)-1])
-		libs = append(libs, library{path: path, pkg: pkg})
+		libs = append(libs, library{path: path, pkgName: pkg})
 	}
 	if err := scanner.Err(); err != nil {
 		return libs, err
