@@ -37,14 +37,25 @@ func (lib *library) Modified() (time.Time, error) {
 	return mtime, nil
 }
 
-func (lib *library) Package() (*pkg, error) {
+func (lib *library) Package() (Package, error) {
 	return findPackage(lib.pkgName)
+}
+
+func (lib *library) Outdated() bool {
+	// XXX: Implement stub
+	return false
+}
+
+// Processes returns the processes using this library
+func (lib *library) Processes() ([]Process, error) {
+	// XXX: Implement stub
+	return nil, nil
 }
 
 // parseFindLibrary parses output produced by commands run within FindLibrary,
 // separated out for testing.
-func parseFindLibrary(buf *bytes.Buffer) ([]library, error) {
-	libs := []library{}
+func parseFindLibrary(buf *bytes.Buffer) ([]Library, error) {
+	libs := []Library{}
 	scanner := bufio.NewScanner(buf)
 	for scanner.Scan() {
 		// Each line should look like:
@@ -55,7 +66,7 @@ func parseFindLibrary(buf *bytes.Buffer) ([]library, error) {
 			return nil, ErrParseCmdOutput
 		}
 		pkg, path := parts[0], strings.TrimSpace(parts[len(parts)-1])
-		libs = append(libs, library{path: path, pkgName: pkg})
+		libs = append(libs, &library{path: path, pkgName: pkg})
 	}
 	if err := scanner.Err(); err != nil {
 		return libs, err
@@ -65,7 +76,7 @@ func parseFindLibrary(buf *bytes.Buffer) ([]library, error) {
 }
 
 // FindLibrary uses `dpkg -S` to find libraries with the given path substring.
-func FindLibrary(path string) ([]library, error) {
+func FindLibrary(path string) ([]Library, error) {
 	cmd := exec.Command("dpkg", "-S", path)
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf

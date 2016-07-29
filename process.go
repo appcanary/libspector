@@ -46,8 +46,14 @@ func (p *process) Started() (time.Time, error) {
 	return started, nil
 }
 
+// Libraries returns the dynamically linked libraries used by this process.
+func (p *process) Libraries() ([]Library, error) {
+	// XXX: Implement stub
+	return nil, nil
+}
+
 // FindProcess uses `pgrep` to find all processes that match a command.
-func FindProcess(command string) ([]process, error) {
+func FindProcess(command string) ([]Process, error) {
 	// TODO: Do we want more flexible querying abilities? Such as full arg substring, or parent pid, etc?
 	// TODO: Consider getting the full process list at once, including start time with `ps aux` or similar?
 	cmd := exec.Command("pgrep", command)
@@ -58,7 +64,7 @@ func FindProcess(command string) ([]process, error) {
 		return nil, err
 	}
 
-	procs := []process{}
+	procs := []Process{}
 	for {
 		var pid int
 		_, err := fmt.Fscanf(buf, "%d\n", &pid)
@@ -69,7 +75,7 @@ func FindProcess(command string) ([]process, error) {
 			return nil, err
 		}
 
-		procs = append(procs, process{pid: pid})
+		procs = append(procs, &process{pid: pid})
 	}
 	return procs, nil
 }
