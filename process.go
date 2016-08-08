@@ -48,8 +48,7 @@ func (p *process) Started() (time.Time, error) {
 
 // Libraries returns the dynamically linked libraries used by this process.
 func (p *process) Libraries() ([]Library, error) {
-	// XXX: Implement stub
-	return nil, nil
+	return findLibraryByPID(p.pid)
 }
 
 // FindProcess uses `pgrep` to find all processes that match a command.

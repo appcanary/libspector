@@ -56,7 +56,7 @@ $ ldd /usr/sbin/nginx
 List of dynamically linked libraries of a *progress*:
 
 ```
-$ # pldd 10546
+$ pldd 10546
 10546:  /usr/sbin/nginx
 linux-vdso.so.1
 /lib/x86_64-linux-gnu/libpthread.so.0
@@ -84,6 +84,8 @@ $ pmap 10546
 00007fee2102f000      4K rw---  /lib/x86_64-linux-gnu/libnss_files-2.17.so
 ...
 ```
+
+pmap seems to give resolved paths.
 
 Package owns file:
 

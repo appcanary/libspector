@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -78,6 +79,55 @@ func parseFindLibrary(buf *bytes.Buffer) ([]Library, error) {
 // FindLibrary uses `dpkg -S` to find libraries with the given path substring.
 func FindLibrary(path string) ([]Library, error) {
 	cmd := exec.Command("dpkg", "-S", path)
+	buf := new(bytes.Buffer)
+	cmd.Stdout = buf
+
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+
+	return parseFindLibrary(buf)
+}
+
+func parseFindLibraryByPID(buf *bytes.Buffer) ([]Library, error) {
+	// First line looks like this:
+	// 1234:    nginx: master process /usr/sbin/nginx
+	// Then every following line is:
+	// 0000000000400000    788K r-x--  /usr/sbin/nginx
+	libs := []Library{}
+	scanner := bufio.NewScanner(buf)
+	scanner.Scan() // Skip first line
+
+	seen := map[string]bool{}
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+		if len(parts) < 4 {
+			return nil, ErrParseCmdOutput
+		}
+		path := parts[3]
+		if !strings.HasPrefix(path, "/") {
+			// Skip anon lines etc.
+			continue
+		}
+		if _, ok := seen[path]; ok {
+			// Already seen, skip
+			continue
+		}
+		seen[path] = true
+		libs = append(libs, &library{path: path})
+	}
+	if err := scanner.Err(); err != nil {
+		return libs, err
+	}
+
+	return libs, nil
+}
+
+// findLibraryByPID uses `pldd $PID` to find libraries that are being used by a given PID.
+func findLibraryByPID(pid int) ([]Library, error) {
+	cmd := exec.Command("pldd", fmt.Sprintf("%d", pid))
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf
 
