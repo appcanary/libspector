@@ -1,3 +1,8 @@
+// Package libspector provides query functions for finding installed libraries
+// and libraries used by active processes.
+//
+// This functionality is implemented by running various platform-native
+// commands, concurrency safety is not implemented.
 package libspector
 
 import "time"
@@ -16,9 +21,6 @@ type Library interface {
 
 	// Distribution package manager's dependency that owns this library.
 	Package() (Package, error)
-
-	// Find processes using this library
-	Processes() ([]Process, error)
 }
 
 // Process is a currently-running process.

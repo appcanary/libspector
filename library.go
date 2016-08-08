@@ -47,12 +47,6 @@ func (lib *library) Outdated() bool {
 	return false
 }
 
-// Processes returns the processes using this library
-func (lib *library) Processes() ([]Process, error) {
-	// XXX: Implement stub
-	return nil, nil
-}
-
 // parseFindLibrary parses output produced by commands run within FindLibrary,
 // separated out for testing.
 func parseFindLibrary(buf *bytes.Buffer) ([]Library, error) {
