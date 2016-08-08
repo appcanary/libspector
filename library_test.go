@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"testing"
+	"time"
 )
 
 var sampleOutputs = map[string]string{
@@ -79,5 +80,30 @@ func TestParseFindLibraryByPID(t *testing.T) {
 		if got := lib.Path(); got != expected.Path {
 			t.Errorf("case #%d Path: got %q; want %q", i, got, expected.Path)
 		}
+	}
+}
+
+func TestLibraryOutdated(t *testing.T) {
+	mtime := time.Date(2016, time.January, 1, 12, 0, 0, 0, time.UTC)
+	var lib Library = &library{
+		path:     "/usr/lib/foo.so",
+		pkgName:  "libfoo",
+		modified: &mtime,
+	}
+
+	// Process is newer than library
+	stime := time.Date(2016, time.January, 1, 13, 0, 0, 0, time.UTC)
+	proc := &process{
+		pid:     1234,
+		started: &stime,
+	}
+	if actual, expected := lib.Outdated(proc), false; actual != expected {
+		t.Errorf("got %s; want %s", actual, expected)
+	}
+
+	// Process is older than library
+	*proc.started = time.Date(2016, time.January, 1, 11, 0, 0, 0, time.UTC)
+	if actual, expected := lib.Outdated(proc), true; actual != expected {
+		t.Errorf("got %v; want %v", actual, expected)
 	}
 }

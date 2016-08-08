@@ -42,9 +42,19 @@ func (lib *library) Package() (Package, error) {
 	return findPackage(lib.pkgName)
 }
 
-func (lib *library) Outdated() bool {
-	// XXX: Implement stub
-	return false
+// Outdated compares the modified time of the library path against the timestamp of when the process was started.
+func (lib *library) Outdated(proc Process) bool {
+	mtime, err := lib.Modified()
+	if err != nil {
+		// Library path could not be queried, must be outdated.
+		return true
+	}
+	stime, err := proc.Started()
+	if err != nil {
+		// Process start time could not be queried, must have been killed so can't be outdated.
+		return false
+	}
+	return stime.Before(mtime)
 }
 
 // parseFindLibrary parses output produced by commands run within FindLibrary,
