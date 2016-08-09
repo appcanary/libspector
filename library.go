@@ -3,7 +3,6 @@ package libspector
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,11 +10,10 @@ import (
 	"time"
 )
 
-var ErrParseCmdOutput = errors.New("failed to parse command output")
-
 type library struct {
 	path     string
 	pkgName  string
+	pkg      Package
 	modified *time.Time
 }
 
@@ -39,7 +37,28 @@ func (lib *library) Modified() (time.Time, error) {
 }
 
 func (lib *library) Package() (Package, error) {
-	return findPackage(lib.pkgName)
+	if lib.pkg != nil {
+		// Is the package already loaded?
+		return lib.pkg, nil
+	}
+	if lib.pkgName != "" {
+		// Do we have the package name?
+		pkg, err := findPackage(lib.pkgName)
+		if err != nil {
+			return nil, err
+		}
+		lib.pkg = pkg
+		return pkg, nil
+	}
+	// Find the package from scratch.
+	libs, err := FindLibrary(lib.path)
+	if err != nil {
+		return nil, err
+	}
+	if len(libs) != 1 {
+		return nil, fmt.Errorf("failed to uniquely identify path %q, found %d results", lib.path, len(libs))
+	}
+	return libs[0].Package()
 }
 
 // Outdated compares the modified time of the library path against the timestamp of when the process was started.
@@ -68,7 +87,7 @@ func parseFindLibrary(buf *bytes.Buffer) ([]Library, error) {
 		line := scanner.Text()
 		parts := strings.Split(line, ":")
 		if len(parts) < 2 {
-			return nil, ErrParseCmdOutput
+			return nil, ErrParse(line)
 		}
 		pkg, path := parts[0], strings.TrimSpace(parts[len(parts)-1])
 		libs = append(libs, &library{path: path, pkgName: pkg})
@@ -106,9 +125,13 @@ func parseFindLibraryByPID(buf *bytes.Buffer) ([]Library, error) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		if strings.HasPrefix(line, " ") {
+			// Finished parsing, found " total: ..." line
+			break
+		}
 		parts := strings.Fields(line)
 		if len(parts) < 4 {
-			return nil, ErrParseCmdOutput
+			return nil, ErrParse(line)
 		}
 		path := parts[3]
 		if !strings.HasPrefix(path, "/") {
@@ -129,9 +152,9 @@ func parseFindLibraryByPID(buf *bytes.Buffer) ([]Library, error) {
 	return libs, nil
 }
 
-// findLibraryByPID uses `pldd $PID` to find libraries that are being used by a given PID.
+// findLibraryByPID uses `pmap $PID` to find libraries that are being used by a given PID.
 func findLibraryByPID(pid int) ([]Library, error) {
-	cmd := exec.Command("pldd", fmt.Sprintf("%d", pid))
+	cmd := exec.Command("pmap", fmt.Sprintf("%d", pid))
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf
 
@@ -139,5 +162,5 @@ func findLibraryByPID(pid int) ([]Library, error) {
 		return nil, err
 	}
 
-	return parseFindLibrary(buf)
+	return parseFindLibraryByPID(buf)
 }

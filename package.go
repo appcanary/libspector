@@ -30,15 +30,17 @@ func (p *pkg) Version() string {
 func parseFindPackage(buf *bytes.Buffer) (*pkg, error) {
 	scanner := bufio.NewScanner(buf)
 	scanner.Scan()
-	name := strings.TrimRight(scanner.Text(), ":")
+	line := scanner.Text()
+	name := strings.TrimRight(line, ":")
 	if name == "" {
-		return nil, ErrParseCmdOutput
+		return nil, ErrParse(line)
 	}
 
 	scanner.Scan()
-	parts := strings.Split(scanner.Text(), ": ")
+	line = scanner.Text()
+	parts := strings.Split(line, ": ")
 	if len(parts) != 2 {
-		return nil, ErrParseCmdOutput
+		return nil, ErrParse(line)
 	}
 	version := parts[1]
 

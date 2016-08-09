@@ -149,4 +149,5 @@ $ stat --format="%z" /lib/x86_64-linux-gnu/libcrypt.so.1
 
 ## OSX
 
-`otool -L`
+* `otool -L`
+* `vmmap $PID`

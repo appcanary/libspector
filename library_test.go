@@ -14,7 +14,7 @@ libc6:amd64: /lib/x86_64-linux-gnu/libthread_db.so.1
 libnss3-1d:amd64: /usr/lib/x86_64-linux-gnu/libnssutil3.so.1d
 liblxc0: /usr/lib/x86_64-linux-gnu/liblxc.so.1.0.0.alpha1
 `,
-	"pldd 1234": `1234:   nginx: master process /usr/sbin/nginx
+	"pmap 1234": `1234:   nginx: master process /usr/sbin/nginx
 0000000000400000    788K r-x--  /usr/sbin/nginx
 00000000006c4000      4K r----  /usr/sbin/nginx
 00000000006c5000     84K rw---  /usr/sbin/nginx
@@ -59,7 +59,7 @@ func TestParseFindLibrary(t *testing.T) {
 
 func TestParseFindLibraryByPID(t *testing.T) {
 	var buf = new(bytes.Buffer)
-	fmt.Fprint(buf, sampleOutputs["pldd 1234"])
+	fmt.Fprint(buf, sampleOutputs["pmap 1234"])
 
 	libs, err := parseFindLibraryByPID(buf)
 	if err != nil {

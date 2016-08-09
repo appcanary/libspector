@@ -9,10 +9,14 @@ import (
 	"time"
 )
 
-const layoutLStart = "Mon _2 Jan 15:04:05 2006"
-
 func parseLStart(s string) (time.Time, error) {
 	return time.Parse(layoutLStart, s)
+}
+
+func ProcessByPID(pid int) Process {
+	return &process{
+		pid: pid,
+	}
 }
 
 type process struct {
