@@ -33,6 +33,9 @@ type Library interface {
 
 // Process is a currently-running process.
 type Process interface {
+	// Command returns the command used to start the process.
+	Command() (string, error)
+
 	// PID returns the process ID.
 	PID() int
 
