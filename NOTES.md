@@ -53,7 +53,7 @@ $ ldd /usr/sbin/nginx
     ...
 ```
 
-List of dynamically linked libraries of a *progress*:
+List of dynamically linked libraries of a *process*:
 
 ```
 $ pldd 10546

@@ -152,7 +152,7 @@ func parseFindLibraryByPID(buf *bytes.Buffer) ([]Library, error) {
 	return libs, nil
 }
 
-// findLibraryByPID uses `pmap $PID` to find libraries that are being used by a given PID.
+// findLibraryByPID uses `pmap -p $PID` to find libraries that are being used by a given PID.
 func findLibraryByPID(pid int) ([]Library, error) {
 	cmd := exec.Command("pmap", "-p", fmt.Sprintf("%d", pid))
 	buf := new(bytes.Buffer)

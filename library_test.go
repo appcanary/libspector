@@ -98,7 +98,7 @@ func TestLibraryOutdated(t *testing.T) {
 		started: &stime,
 	}
 	if actual, expected := lib.Outdated(proc), false; actual != expected {
-		t.Errorf("got %s; want %s", actual, expected)
+		t.Errorf("got %t; want %t", actual, expected)
 	}
 
 	// Process is older than library
