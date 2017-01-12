@@ -4,8 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"shazow/libspector"
 	"strconv"
+
+	"github.com/appcanary/libspector"
 )
 
 func fail(code int, msg string, args ...interface{}) {
