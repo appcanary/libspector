@@ -1,6 +1,7 @@
 package libspector
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -55,10 +56,47 @@ func (p *process) Libraries() ([]Library, error) {
 	return findLibraryByPID(p.pid)
 }
 
+func AllProcesses() ([]Process, error) {
+	cmd := exec.Command("ps", "aux")
+	buf := new(bytes.Buffer)
+	cmd.Stdout = buf
+
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+
+	procs := []Process{}
+
+	scanner := bufio.NewScanner(buf)
+	scanner.Scan() // Skip the first line
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+		pidString := bytes.NewBufferString(parts[1])
+
+		var pid int
+		if _, err := fmt.Fscanf(pidString, "%d\n", &pid); err != nil {
+			return nil, err
+		}
+
+		// Skip our own `ps` process
+		if pid != cmd.Process.Pid {
+			procs = append(procs, &process{pid: pid})
+		}
+	}
+
+	return procs, nil
+}
+
 // FindProcess uses `pgrep` to find all processes that match a command.
 func FindProcess(command string) ([]Process, error) {
-	// TODO: Do we want more flexible querying abilities? Such as full arg substring, or parent pid, etc?
-	// TODO: Consider getting the full process list at once, including start time with `ps aux` or similar?
+	// TODO: Do we want more flexible querying abilities? Such as full arg
+	// substring, or parent pid, etc?
+
+	// TODO: Consider getting the full process list at once, including start
+	// time with `ps aux` or similar?
+
 	cmd := exec.Command("pgrep", command)
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf
@@ -80,5 +118,6 @@ func FindProcess(command string) ([]Process, error) {
 
 		procs = append(procs, &process{pid: pid})
 	}
+
 	return procs, nil
 }

@@ -44,8 +44,12 @@ type Process interface {
 }
 
 type Query interface {
+	// AllProcesses returns all the running processes on the system.
+	AllProcesses() ([]Process, error)
+
 	// FindProcess finds all running processes that match the command substring.
 	FindProcess(command string) ([]Process, error)
+
 	// FindLibrary finds all the installed libraries that match the path substring.
 	FindLibrary(path string) ([]Library, error)
 }
