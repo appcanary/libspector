@@ -23,11 +23,28 @@ func ProcessByPID(pid int) Process {
 type process struct {
 	pid     int
 	started *time.Time
+	command string
 }
 
 // PID returns the process ID.
 func (p *process) PID() int {
 	return p.pid
+}
+
+// Command returns the full command line string used to invoke the process.
+func (p *process) Command() (string, error) {
+	if p.command != "" {
+		return p.command, nil
+	}
+
+	cmd := exec.Command("ps", "-p", fmt.Sprintf("%d", p.PID()), "-o", "args=")
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	p.command = strings.TrimSpace(string(out))
+	return p.command, nil
 }
 
 // Started uses `ps` to query the start timestamp of the process.
@@ -93,11 +110,14 @@ func AllProcesses() ([]Process, error) {
 func FindProcess(command string) ([]Process, error) {
 	// TODO: Do we want more flexible querying abilities? Such as full arg
 	// substring, or parent pid, etc?
+	// UPDATE: I've added `-f` which should give full arg substring matching,
+	// but we might still want to add a more flexible set of controls for
+	// matching.
 
 	// TODO: Consider getting the full process list at once, including start
 	// time with `ps aux` or similar?
 
-	cmd := exec.Command("pgrep", command)
+	cmd := exec.Command("pgrep", "-f", command)
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf
 
