@@ -99,6 +99,8 @@ func AllProcesses() ([]Process, error) {
 
 		// Skip our own `ps` process
 		if pid != cmd.Process.Pid {
+			// TODO It will be cheaper to fill in the rest of the process data
+			// here from a single invocation of `ps`.
 			procs = append(procs, &process{pid: pid})
 		}
 	}
