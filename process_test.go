@@ -1,6 +1,9 @@
 package libspector
 
 import (
+	"fmt"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
@@ -46,6 +49,38 @@ func TestAllProcesses(t *testing.T) {
 	}
 }
 
+func TestProcessCommand(t *testing.T) {
+	script, err := filepath.Abs("test_script.sh")
+	if err != nil {
+		t.Error(err)
+	}
+
+	cmd := exec.Command(script, "1", "hello", "douche", "4")
+	err = cmd.Start()
+	if err != nil {
+		t.Error(err)
+	}
+	defer cmd.Process.Kill()
+
+	procs, err := FindProcess("test_script")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(procs) == 0 {
+		t.Error("failed to find process")
+	}
+
+	fullCommand, err := procs[0].Command()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if fullCommand != fmt.Sprintf("sh %s 1 hello douche 4", script) {
+		t.Errorf("Command was wrong: %s", fullCommand)
+	}
+}
+
 func TestFindProcess(t *testing.T) {
 	// Find some shells, any shells. Hopefully there are shells.
 	query := "sh"
@@ -56,7 +91,7 @@ func TestFindProcess(t *testing.T) {
 	}
 
 	if len(procs) == 0 {
-		t.Errorf("failed to find process")
+		t.Error("failed to find process")
 	}
 
 	noTime := time.Time{}

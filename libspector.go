@@ -41,6 +41,9 @@ type Process interface {
 
 	// Find libraries used by this process
 	Libraries() ([]Library, error)
+
+	// Command line used to start the process
+	Command() (string, error)
 }
 
 type Query interface {
