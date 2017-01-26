@@ -69,6 +69,23 @@ func (p *process) Started() (time.Time, error) {
 	return started, nil
 }
 
+// Command uses `ps` to query the command of the process.
+func (p *process) Command() (string, error) {
+	if p.command != "" {
+		return p.command, nil
+	}
+
+	cmd := exec.Command("ps", "-p", fmt.Sprintf("%d", p.PID()), "-o", "cmd=")
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	command := strings.TrimSpace(string(out))
+	p.command = command
+	return command, nil
+}
+
 // Libraries returns the dynamically linked libraries used by this process.
 func (p *process) Libraries() ([]Library, error) {
 	return findLibraryByPID(p.pid)
