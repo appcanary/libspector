@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -74,7 +75,7 @@ func (p *process) Libraries() ([]Library, error) {
 }
 
 func AllProcesses() ([]Process, error) {
-	cmd := exec.Command("ps", "aux")
+	cmd := exec.Command("ps", "axww", "-o", "lstart:30,pid:10,args")
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf
 
@@ -89,19 +90,30 @@ func AllProcesses() ([]Process, error) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		parts := strings.Fields(line)
-		pidString := bytes.NewBufferString(parts[1])
+
+		startTime, err := parseLStart(strings.TrimSpace(line[:30]))
+		if err != nil {
+			log.Printf("Failed to parse process start time: %v", err)
+			continue
+		}
+
+		pidString := bytes.NewBufferString(line[31:41])
 
 		var pid int
 		if _, err := fmt.Fscanf(pidString, "%d\n", &pid); err != nil {
-			return nil, err
+			log.Printf("Failed to parse process PID: %v", err)
+			continue
 		}
+
+		commandLine := line[42:]
 
 		// Skip our own `ps` process
 		if pid != cmd.Process.Pid {
-			// TODO It will be cheaper to fill in the rest of the process data
-			// here from a single invocation of `ps`.
-			procs = append(procs, &process{pid: pid})
+			procs = append(procs, &process{
+				pid:     pid,
+				command: commandLine,
+				started: &startTime,
+			})
 		}
 	}
 
