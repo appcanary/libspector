@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -27,13 +27,18 @@ func (lib *library) Modified() (time.Time, error) {
 	if lib.modified != nil {
 		return *lib.modified, nil
 	}
-	info, err := os.Stat(lib.path)
+
+	var stat syscall.Stat_t
+	err := syscall.Stat(lib.path, &stat)
 	if err != nil {
 		return time.Time{}, err
 	}
-	mtime := info.ModTime()
-	lib.modified = &mtime
-	return mtime, nil
+
+	sec, nsec := stat.Ctim.Unix()
+	ctime := time.Unix(sec, nsec)
+	lib.modified = &ctime
+
+	return ctime, nil
 }
 
 func (lib *library) Package() (Package, error) {
