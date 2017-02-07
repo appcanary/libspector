@@ -71,13 +71,22 @@ func TestProcessCommand(t *testing.T) {
 		t.Error("failed to find process")
 	}
 
-	fullCommand, err := procs[0].Command()
+	fullCommand, err := procs[0].CommandArgs()
 	if err != nil {
 		t.Error(err)
 	}
 
 	if fullCommand != fmt.Sprintf("sh %s 1 hello douche 4", script) {
-		t.Errorf("Command was wrong: %s", fullCommand)
+		t.Errorf("CommandArgs was wrong: %s", fullCommand)
+	}
+
+	commandName, err := procs[0].CommandName()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if commandName != "sh" {
+		t.Errorf("CommandName was wrong: %s", commandName)
 	}
 }
 

@@ -43,7 +43,9 @@ type Process interface {
 	Libraries() ([]Library, error)
 
 	// Command line used to start the process
-	Command() (string, error)
+	CommandArgs() (string, error)
+
+	CommandName() (string, error)
 }
 
 type Query interface {

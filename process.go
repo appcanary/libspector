@@ -22,9 +22,10 @@ func ProcessByPID(pid int) Process {
 }
 
 type process struct {
-	pid     int
-	started *time.Time
-	command string
+	pid         int
+	started     *time.Time
+	commandName string
+	commandArgs string
 }
 
 // PID returns the process ID.
@@ -32,10 +33,10 @@ func (p *process) PID() int {
 	return p.pid
 }
 
-// Command returns the full command line string used to invoke the process.
-func (p *process) Command() (string, error) {
-	if p.command != "" {
-		return p.command, nil
+// CommandArgs returns the full command line string used to invoke the process.
+func (p *process) CommandArgs() (string, error) {
+	if p.commandArgs != "" {
+		return p.commandArgs, nil
 	}
 
 	cmd := exec.Command("ps", "-p", fmt.Sprintf("%d", p.PID()), "-o", "args=")
@@ -44,8 +45,23 @@ func (p *process) Command() (string, error) {
 		return "", err
 	}
 
-	p.command = strings.TrimSpace(string(out))
-	return p.command, nil
+	p.commandArgs = strings.TrimSpace(string(out))
+	return p.commandArgs, nil
+}
+
+func (p *process) CommandName() (string, error) {
+	if p.commandName != "" {
+		return p.commandName, nil
+	}
+
+	cmd := exec.Command("ps", "-p", fmt.Sprintf("%d", p.PID()), "-o", "comm=")
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	p.commandName = strings.TrimSpace(string(out))
+	return p.commandName, nil
 }
 
 // Started uses `ps` to query the start timestamp of the process.
@@ -75,7 +91,7 @@ func (p *process) Libraries() ([]Library, error) {
 }
 
 func AllProcesses() ([]Process, error) {
-	cmd := exec.Command("ps", "axww", "-o", "lstart:30,pid:10,args")
+	cmd := exec.Command("ps", "axww", "-o", "lstart:30,pid:10,comm:15,args")
 	buf := new(bytes.Buffer)
 	cmd.Stdout = buf
 
@@ -105,14 +121,17 @@ func AllProcesses() ([]Process, error) {
 			continue
 		}
 
-		commandLine := line[42:]
+		commandName := line[42:57]
+
+		commandArgs := line[58:]
 
 		// Skip our own `ps` process
 		if pid != cmd.Process.Pid {
 			procs = append(procs, &process{
-				pid:     pid,
-				command: commandLine,
-				started: &startTime,
+				pid:         pid,
+				commandName: commandName,
+				commandArgs: commandArgs,
+				started:     &startTime,
 			})
 		}
 	}
