@@ -4,36 +4,21 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
 )
 
 type library struct {
-	path     string
-	pkgName  string
-	pkg      Package
-	modified *time.Time
+	path    string
+	pkgName string
+	pkg     Package
+	ctime   *time.Time
 }
 
 // Path returns the full path of this library file.
 func (lib *library) Path() string {
 	return lib.path
-}
-
-// Modified returns the modification time of the library path.
-func (lib *library) Modified() (time.Time, error) {
-	if lib.modified != nil {
-		return *lib.modified, nil
-	}
-	info, err := os.Stat(lib.path)
-	if err != nil {
-		return time.Time{}, err
-	}
-	mtime := info.ModTime()
-	lib.modified = &mtime
-	return mtime, nil
 }
 
 func (lib *library) Package() (Package, error) {
@@ -61,9 +46,9 @@ func (lib *library) Package() (Package, error) {
 	return libs[0].Package()
 }
 
-// Outdated compares the modified time of the library path against the timestamp of when the process was started.
+// Outdated compares the ctime of the library path against the timestamp of when the process was started.
 func (lib *library) Outdated(proc Process) bool {
-	mtime, err := lib.Modified()
+	mtime, err := lib.Ctime()
 	if err != nil {
 		// Library path could not be queried, must be outdated.
 		return true

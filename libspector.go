@@ -21,10 +21,10 @@ type Library interface {
 	// Path returns the absolute path of the library on the filesystem.
 	Path() string
 
-	// Modified returns the last modified time of the library on the filesystem.
-	Modified() (time.Time, error)
+	// Ctime returns the last ctime of the library on the filesystem.
+	Ctime() (time.Time, error)
 
-	// Outdated returns whether Process was started earlier than the Modified time of this library.
+	// Outdated returns whether Process was started earlier than the Ctime time of this library.
 	Outdated(Process) bool
 
 	// Distribution package manager's dependency that owns this library.
