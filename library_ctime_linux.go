@@ -5,11 +5,11 @@ import (
 	"time"
 )
 
-// Modified returns the modification time of the library path.
+// Ctime returns the changed time of the library path.
 
-func (lib *library) Modified() (time.Time, error) {
-	if lib.modified != nil {
-		return *lib.modified, nil
+func (lib *library) Ctime() (time.Time, error) {
+	if lib.ctime != nil {
+		return *lib.ctime, nil
 	}
 
 	var stat syscall.Stat_t
@@ -21,7 +21,7 @@ func (lib *library) Modified() (time.Time, error) {
 
 	sec, nsec := stat.Ctim.Unix()
 	ctime := time.Unix(sec, nsec)
-	lib.modified = &ctime
+	lib.ctime = &ctime
 
 	return ctime, nil
 }

@@ -10,10 +10,10 @@ import (
 )
 
 type library struct {
-	path     string
-	pkgName  string
-	pkg      Package
-	modified *time.Time
+	path    string
+	pkgName string
+	pkg     Package
+	ctime   *time.Time
 }
 
 // Path returns the full path of this library file.
@@ -46,9 +46,9 @@ func (lib *library) Package() (Package, error) {
 	return libs[0].Package()
 }
 
-// Outdated compares the modified time of the library path against the timestamp of when the process was started.
+// Outdated compares the ctime of the library path against the timestamp of when the process was started.
 func (lib *library) Outdated(proc Process) bool {
-	mtime, err := lib.Modified()
+	mtime, err := lib.Ctime()
 	if err != nil {
 		// Library path could not be queried, must be outdated.
 		return true

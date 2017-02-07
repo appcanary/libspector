@@ -84,11 +84,11 @@ func TestParseFindLibraryByPID(t *testing.T) {
 }
 
 func TestLibraryOutdated(t *testing.T) {
-	mtime := time.Date(2016, time.January, 1, 12, 0, 0, 0, time.UTC)
+	ctime := time.Date(2016, time.January, 1, 12, 0, 0, 0, time.UTC)
 	var lib Library = &library{
-		path:     "/usr/lib/foo.so",
-		pkgName:  "libfoo",
-		modified: &mtime,
+		path:    "/usr/lib/foo.so",
+		pkgName: "libfoo",
+		ctime:   &ctime,
 	}
 
 	// Process is newer than library
