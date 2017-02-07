@@ -121,7 +121,7 @@ func AllProcesses() ([]Process, error) {
 			continue
 		}
 
-		commandName := line[42:57]
+		commandName := strings.TrimSpace(line[42:57])
 
 		commandArgs := line[58:]
 
